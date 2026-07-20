@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.21'
+    id 'net.neoforged.gradle.userdev' version '7.1.38'
 }
 
 version = mod_version
@@ -33,7 +33,7 @@ runs {
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:21.11.42"
+    implementation "net.neoforged:neoforge:21.11.44"
 }
 
 tasks.withType(JavaCompile).configureEach {
