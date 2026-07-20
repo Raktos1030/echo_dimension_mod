@@ -12,18 +12,37 @@ base {
     archivesName = mod_id
 }
 
-minecraft {
-    runs {
-        client {
-            commonArgs '--nogui'
-            client()
-        }
-        server {
-            server()
-        }
-        gameTestServer {
-            server()
-        }
+runs {
+    configureEach {
+        workingDirectory(project.layout.buildDirectory.dir('run/' + name))
+        machineJvmArgs.addAll(negatedJvmArgs)
+    }
+
+    client {
+        commonArg('--nogui')
+        property('forge.logging.markers', 'REGEX')
+        property('forge.logging.console.level', 'debug')
+        property('forge.enabledGameTestNamespaces', mod_id)
+        client()
+        gameTest.registerGameTestTask()
+    }
+
+    server {
+        property('forge.enabledGameTestNamespaces', mod_id)
+        server()
+        gameTest.registerGameTestTask()
+    }
+
+    gameTestServer {
+        server()
+    }
+
+    data {
+        workingDirectory(project.layout.buildDirectory.dir('run'))
+        property('forge.enabledGameTestNamespaces', mod_id)
+        property('forge.mapping.sourceOnly', 'true')
+        args('--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath())
+        client()
     }
 }
 
@@ -64,10 +83,6 @@ tasks.named('processResources') {
 
 tasks.named('sourcesJar', JavaCompile) {
     archiveClassifier = 'sources'
-}
-
-tasks.named('gameTestServer') {
-    workingDirectory(file('run'))
 }
 
 tasks.register('setup') {
