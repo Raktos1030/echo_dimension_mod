@@ -62,7 +62,7 @@ tasks.named('processResources') {
     expand replaceProperties
 }
 
-tasks.named('jar', JavaCompile) {
+tasks.named('sourcesJar', JavaCompile) {
     archiveClassifier = 'sources'
 }
 
