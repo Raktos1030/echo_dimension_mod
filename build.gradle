@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.142'
+    id 'net.neoforged.gradle.userdev' version '7.0.189'
 }
 
 version = mod_version
@@ -12,42 +12,17 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-
 minecraft {
-    mappings channel: 'parchment', version: '1.21.1-0.2.2+build.17'
-
     runs {
         client {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            systemProperty 'forge.logging.console.level', 'debug'
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-
-            args '--nogui'
-            property 'forge.enabledGameTestNamespaces', mod_id
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
+            commonArgs '--nogui'
             client()
-            jvmArgs '--add-modules', 'jdk.incubator.void'
         }
-
         server {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            systemProperty 'forge.logging.console.level', 'debug'
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-
             server()
-            jvmArgs '--add-modules', 'jdk.incubator.void'
         }
-
         gameTestServer {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            systemProperty 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', mod_id
-
             server()
-            jvmArgs '--add-modules', 'jdk.incubator.void'
         }
     }
 }
@@ -62,9 +37,6 @@ repositories {
     maven {
         name = 'Minecraft Fortress'
         url = 'https://maven.neoforged.net/releases'
-        content {
-            includeGroup '*'
-        }
     }
 }
 
@@ -75,7 +47,6 @@ dependencies {
 tasks.named('processResources') {
     var replaceProperties = [
             minecraft_version   : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
             neoform_version     : neoform_version,
             loader_version_range: loader_version_range,
             mod_id              : mod_id,
@@ -88,9 +59,7 @@ tasks.named('processResources') {
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforged.mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties
-    }
+    expand replaceProperties
 }
 
 tasks.named('jar', JavaCompile) {
