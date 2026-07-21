@@ -84,7 +84,8 @@ tasks.named('processResources') {
     }
 }
 
-tasks.named('sourcesJar', JavaCompile) {
+tasks.register('sourcesJar', Jar) {
+    from sourceSets.main.allJava
     archiveClassifier = 'sources'
 }
 
