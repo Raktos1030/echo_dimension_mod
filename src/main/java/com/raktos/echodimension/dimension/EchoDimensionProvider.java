@@ -33,13 +33,8 @@ public class EchoDimensionProvider {
         Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.FOREST);
         BiomeSource biomeSource = new FixedBiomeSource(echoBiome);
 
-        // 1.21.1: NoiseBasedChunkGenerator(BiomeSource, StructureSet[], NoiseGeneratorSettings)
-        StructureSet[] structureSets = structureSetGetter.listElementIds()
-                .map(id -> structureSetGetter.getOrThrow(id))
-                .toArray(StructureSet[]::new);
-
-        NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(
-                biomeSource, structureSets, genSettings);
+        // 1.21.1: NoiseBasedChunkGenerator(BiomeSource, NoiseGeneratorSettings) - no structure sets
+        NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(biomeSource, genSettings);
 
         return new LevelStem(dimType, chunkGen);
     }

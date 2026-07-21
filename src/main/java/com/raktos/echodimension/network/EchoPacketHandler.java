@@ -3,6 +3,8 @@ package com.raktos.echodimension.network;
 import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Id;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -28,16 +30,21 @@ public class EchoPacketHandler {
         public static final ResourceLocation ID =
                 ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "sync_echo_data");
 
-        @Override
-        public ResourceLocation id() { return ID; }
+        public static final Id<SyncEchoDataPayload> ID_TYPE = new Id<>(ID);
+        public static final Type<SyncEchoDataPayload> TYPE = new Type<>(ID_TYPE);
 
-        public void write(FriendlyByteBuf buffer) {
-            buffer.writeVarInt(structures);
-            buffer.writeVarInt(kills);
-            buffer.writeVarInt(resources);
+        @Override
+        public Id<? extends CustomPacketPayload> id() {
+            return ID_TYPE;
         }
 
-        public static SyncEchoDataPayload read(FriendlyByteBuf buffer) {
+        public static void encode(SyncEchoDataPayload payload, FriendlyByteBuf buffer) {
+            buffer.writeVarInt(payload.structures);
+            buffer.writeVarInt(payload.kills);
+            buffer.writeVarInt(payload.resources);
+        }
+
+        public static SyncEchoDataPayload decode(FriendlyByteBuf buffer) {
             return new SyncEchoDataPayload(buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
         }
     }

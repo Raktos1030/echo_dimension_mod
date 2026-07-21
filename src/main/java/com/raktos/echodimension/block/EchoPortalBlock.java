@@ -6,15 +6,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BlockEntityProvider;
-import net.minecraft.world.level.block.BlockState;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 
-public class EchoPortalBlock extends Block implements BlockEntityProvider {
+public class EchoPortalBlock extends Block implements EntityBlock {
     public static final Block BLOCK = EchoDimensionMod.BLOCKS.register("echo_portal_block",
             () -> new EchoPortalBlock(
                     BlockBehaviour.Properties.of()
@@ -37,7 +37,7 @@ public class EchoPortalBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    public boolean useShapeForNavigation(BlockState state) {
+    public boolean useShapeForCollision(BlockState state) {
         return true;
     }
 

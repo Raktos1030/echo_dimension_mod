@@ -2,6 +2,7 @@ package com.raktos.echodimension.event;
 
 import com.raktos.echodimension.data.PlayerEchoData;
 import com.raktos.echodimension.dimension.EchoDimension;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;

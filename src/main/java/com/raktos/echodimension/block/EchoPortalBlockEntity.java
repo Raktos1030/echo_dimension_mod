@@ -2,6 +2,7 @@ package com.raktos.echodimension.block;
 
 import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -49,8 +50,8 @@ public class EchoPortalBlockEntity extends BlockEntity {
     public java.util.UUID getActivatingPlayer() { return activatingPlayer; }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
         if (activatingPlayer != null) tag.putUUID("activatingPlayer", activatingPlayer);
         tag.putLong("activationTime", activationTime);
         tag.putInt("echoCount", echoCount);
@@ -58,8 +59,8 @@ public class EchoPortalBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
         if (tag.contains("activatingPlayer")) activatingPlayer = tag.getUUID("activatingPlayer");
         activationTime = tag.getLong("activationTime");
         echoCount = tag.getInt("echoCount");

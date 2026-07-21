@@ -5,11 +5,10 @@ import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Properties;
 import net.minecraft.world.level.Level;
 
 public class DimensionAccessItem extends Item {
@@ -23,9 +22,9 @@ public class DimensionAccessItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (level.isClientSide()) return InteractionResult.PASS;
-        if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) return InteractionResultHolder.pass(player.getItemInHand(hand));
+        if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResultHolder.pass(player.getItemInHand(hand));
 
         PlayerEchoData echoData = PlayerEchoData.get(serverPlayer);
         player.displayClientMessage(Component.literal("=== Echo Dimension Status ==="), false);
@@ -33,6 +32,6 @@ public class DimensionAccessItem extends Item {
         player.displayClientMessage(Component.literal("Kills: " + echoData.getKillCount()), false);
         player.displayClientMessage(Component.literal("Resources: " + echoData.getResourceCount()), false);
         player.displayClientMessage(Component.literal("Total Echoes: " + echoData.getTotalEchoes()), false);
-        return InteractionResult.SUCCESS;
+        return InteractionResultHolder.success(player.getItemInHand(hand));
     }
 }
