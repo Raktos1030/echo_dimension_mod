@@ -1,96 +1,165 @@
 plugins {
-    id 'java'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.1'
+    id 'net.neoforged.gradle.game' version '7.0.1'
 }
 
-group = mod_group_id
 version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+}
 
 base {
     archivesName = mod_id
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    withSourcesJar()
-    withJavadocJar()
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(mod_java_version)
 
-// FIX: Remove duplicate sourceSets that double-scans resources
-// NeoGradle handles resources automatically, no need for custom srcDirs
-
-repositories {
-    maven {
-        name = 'Minecraft Fortress'
-        url = 'https://maven.neoforged.net/releases'
-    }
-}
-
-dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
-    implementation 'org.jetbrains:annotations:24.1.0'
-}
-
-// Default run configurations.
 runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
-        modSource project.sourceSets.main
-    }
-
     client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        systemProperty 'forge.logging.markers', 'REGONS'
+        systemProperty 'forge.logging.console.level', 'DEBUG'
+        systemProperty 'neoform.accessTransform', 'data/neoform_access_transform.cfg'
+
+        modSource 'src/main/java'
+        // NeoGradle 7.x uses programArguments instead of argument()
+        programArguments.addAll '--nogui'
+        programArguments.addAll '--fullscreen'
+        neoFormDataRepairManager.setup(client)
     }
 
     server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        argument '--nogui'
+        systemProperty 'forge.logging.markers', 'REGONS'
+        systemProperty 'forge.logging.console.level', 'DEBUG'
+        systemProperty 'neoform.accessTransform', 'data/neoform_access_transform.cfg'
+
+        modSource 'src/main/java'
+        programArguments.addAll '--nogui'
+        programArguments.addAll '--fullscreen'
+        programArguments.addAll 'nogui'
+        neoFormDataRepairManager.setup(server)
     }
 
     gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        systemProperty 'forge.logging.markers', 'REGONS'
+        systemProperty 'forge.logging.console.level', 'DEBUG'
+        programArguments.addAll '--nogui'
+        neoFormDataRepairManager.setup(gameTestServer)
     }
 
     data {
-        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        systemProperty 'forge.logging.markers', 'REGONS'
+        systemProperty 'forge.logging.console.level', 'DEBUG'
+        programArguments.addAll '--mod', mod_id
+        programArguments.addAll '--all'
+        programArguments.addAll '--input', 'src/main/resources'
+        programArguments.addAll '--output', 'run/gametest_resources/generated'
+        programArguments.addAll '--existing', 'run/gametest_resources/existing'
+        programArguments.addAll '--existing-source', 'run/gametest_resources/existing'
+        neoFormDataRepairManager.setup(data)
+        modSource 'src/main/java'
+        modSource 'src/test/java'
     }
 }
 
-configurations {
-    runtimeClasspath.extendsFrom localRuntime
+sourceSets.main.resources { srcDir 'nbmc' }
+
+dependencies {
+    compileOnly "net.neoforged:forge:${neo_version}:${ mappings_channel }@cfg"
+    implementation "net.neoforged:neoform:${neo_version}@jar"
+    runtimeOnly "net.neoforged:forge:${neo_version}:${ mappings_channel }@jar"
+
+    testImplementation "net.neoforged:forge:${neo_version}:${ mappings_channel }@cfg"
+    testRuntimeOnly "net.neoforged:forge:${neo_version}:${ mappings_channel }@jar"
 }
 
-processResources {
-    duplicatesStrategy = 'include'
-    var replaceProperties = [
-            minecraft_version       : minecraft_version,
-            minecraft_version_range : minecraft_version_range,
-            neo_version             : neo_version,
-            loader_version_range    : loader_version_range,
-            mod_id                  : mod_id,
-            mod_name                : mod_name,
-            mod_license             : mod_license,
-            mod_version             : mod_version,
-            mod_group_id            : mod_group_id,
-            mod_jar_url             : project.findProperty('mod_jar_url') ?: '',
-            mod_credits             : project.findProperty('mod_credits') ?: ''
-    ]
-    inputs.properties replaceProperties
+tasks.withType(ProcessResources).configureEach {
+    var nonNeoFormMappings = !project.hasProperty('neoFormMappingsChannel') || project.property('neoFormMappingsChannel').isEmpty()
+    if (nonNeoFormMappings) {
+        inputs.property 'version', mod_version
+    }
 
-    filesMatching(['META-INF/neoforged.mods.toml']) {
-        expand replaceProperties
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    inputs.property 'version', mod_version
+    inputs.property 'group', mod_group_id
+
+    exclude 'META-INF/**'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+minecraft {
+    accessTransform = file('data/neoform_access_transform.cfg')
+    mappings layer {
+        officialUnpusher mappingTypes
+        if (project.hasProperty("neoFormMappingsChannel") && project.property("neoFormMappingsChannel") != null && !project.property("neoFormMappingsChannel").isEmpty()) {
+            neoForm channel project.property("neoFormMappingsChannel"), project.property("neoFormMappingsVersion")
+        }
     }
 }
 
 tasks.withType(Jar).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_author,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveFileVersion.or(project.version),
+                'Implementation-Vendor'   : mod_author,
+                'Implementation-Timestamp': Instant.now().toString(),
+                'MixinTs'                 : mixin_service_config,
+                'NeoForge-Forced-Mod'     : forced_mod,
+                'NeoForge-Mods-Directory' : mods_directory
+        ])
+    }
+}
+
+def includeMod(List specs) {
+    specs.each { spec -> inclusion.container.add spec }
+}
+
+eclipse {
+    classpath 'src/main/java'
+}
+
+idea {
+    module {
+        sourceFolders 'src/main/java'
+        inheritOutputDirs = true
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+            content {
+                includeGroup('net.neoforged')
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId = project.group
+            artifactId = project.archivesName
+            version = project.version
+
+            artifact sourceVariants.all({ it.publishable && it.secondary })
+            pom {
+                name = project.archivesName
+                description = project.projectDescription
+                url = project.projectUrl
+                licenses = project.license
+                developers = project.developers
+                scm = project.scm
+            }
+        }
+    }
 }
