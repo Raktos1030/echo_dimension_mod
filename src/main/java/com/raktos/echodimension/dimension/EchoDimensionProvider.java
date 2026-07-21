@@ -73,7 +73,7 @@ public class EchoDimensionProvider {
     /**
      * Gets the dimensions for registration
      */
-    public static List<WorldDimensions.BonusChestInfo> getBonusChest loot() {
+    public static List<WorldDimensions.BonusChestInfo> getBonusChestLoot() {
         return List.of();
     }
 }
