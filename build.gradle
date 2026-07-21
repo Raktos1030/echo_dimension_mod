@@ -16,27 +16,25 @@ java.toolchain {
     languageVersion = JavaLanguageVersion.of(21)
 }
 
-runs {
-    client {
-        commonArg('--nogui')
-        property('forge.logging.markers', 'REGEX')
-        property('forge.logging.console.level', 'debug')
-        client()
-        gameTest.registerGameTestTask()
-    }
+neoForge {
+    runs {
+        client {
+            client()
+            programArgument('--nogui')
+            property('forge.logging.markers', 'REGEX')
+            property('forge.logging.console.level', 'debug')
+            gameTest.registerGameTestTask()
+        }
 
-    server {
-        server()
-        gameTest.registerGameTestTask()
-    }
+        server {
+            server()
+            gameTest.registerGameTestTask()
+        }
 
-    gameTestServer {
-        server()
-    }
-
-    data {
-        property('forge.mapping.sourceOnly', 'true')
-        client()
+        data {
+            data()
+            property('forge.mapping.sourceOnly', 'true')
+        }
     }
 }
 
