@@ -3,43 +3,40 @@ package com.raktos.echodimension.event;
 import com.raktos.echodimension.EchoDimensionMod;
 import com.raktos.echodimension.data.PlayerEchoData;
 import com.raktos.echodimension.dimension.EchoDimension;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damage.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
- * Player Action Recorder - Captures player actions in the Overworld
- * Records structures, kills, and mining to create echoes in the Echo Dimension
+ * PlayerActionRecorder - Records player actions for Echo Dimension echoes
+ * 
+ * Listens for:
+ * - Block breaking (resources mined)
+ * - Entity kills (mob echoes)
+ * - Player events (respawn, login)
  */
 public class PlayerActionRecorder {
-
-    public static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * Register event handlers
      */
     public static void register(net.neoforged.bus.api.IEventBus bus) {
         bus.register(PlayerActionRecorder.class);
+        EchoDimensionMod.LOGGER.info("PlayerActionRecorder registered");
     }
 
     /**
-     * Record block break (mining)
+     * Record block break (mining) - creates resource echoes
      */
     @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+    public void onBlockBroken(BlockEvent.BreakEvent event) {
         if (event.getLevel().isClientSide()) return;
         if (event.getPlayer() == null) return;
 
@@ -47,54 +44,75 @@ public class PlayerActionRecorder {
         if (EchoDimension.isEchoDimension(event.getLevel())) return;
 
         ServerPlayer player = (ServerPlayer) event.getPlayer();
-        String blockType = event.getState().getBlockHolder().unwrapKey()
-                .map(key -> key.location().toString())
-                .orElse("unknown");
+        ResourceKey<?> blockKey = event.getState().getBlockHolder().key()
+                .map(key -> (ResourceKey<?>) key)
+                .orElse(null);
+
+        String blockType = blockKey != null
+                ? blockKey.location().toString()
+                : "minecraft:stone";
 
         PlayerEchoData data = PlayerEchoData.get(player);
         data.recordResource(blockType, player);
-
-        LOGGER.info("Block mined: {} by {} at {}", blockType, player.getName().getString(), event.getPos());
     }
 
     /**
-     * Record entity kill
+     * Record entity kill - creates mob echoes
      */
     @SubscribeEvent
-    public static void onEntityDeath(LivingDeathEvent event) {
+    public void onEntityKilled(LivingDeathEvent event) {
         if (event.getLevel().isClientSide()) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
 
         // Don't record in Echo Dimension
         if (EchoDimension.isEchoDimension(event.getLevel())) return;
 
-        String entityType = event.getEntity().getType().unwrapKey()
-                .map(key -> key.location().toString())
-                .orElse("unknown");
+        Entity entity = event.getEntity();
+        ResourceKey<?> entityKey = entity.getType().builtInRegistryHolder().key()
+                .map(key -> (ResourceKey<?>) key)
+                .orElse(null);
+
+        String entityType = entityKey != null
+                ? entityKey.location().toString()
+                : "minecraft:pig";
 
         PlayerEchoData data = PlayerEchoData.get(player);
         data.recordKill(entityType, player);
+    }
 
-        LOGGER.info("Entity killed: {} by {} (source: {})", entityType, player.getName().getString(), event.getSource().typeHolder.unwrapKey().map(k -> k.location().toString()).orElse("unknown"));
+    /**
+     * Record entity drops (for loot tracking)
+     */
+    @SubscribeEvent
+    public void onEntityDrop(LivingDropsEvent event) {
+        // Optional: track valuable drops
     }
 
     /**
      * Record player login
      */
     @SubscribeEvent
-    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+    public void onPlayerJoin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            LOGGER.info("Player {} joined. Echo data loaded.", player.getName().getString());
+            EchoDimensionMod.LOGGER.info("Player {} joined with {} echoes",
+                    player.getName().getString(),
+                    PlayerEchoData.get(player).getTotalEchoes());
         }
     }
 
     /**
-     * Record player respawn (switch to living entity event)
+     * Record player respawn
      */
     @SubscribeEvent
-    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            LOGGER.info("Player {} respawned.", player.getName().getString());
-        }
+    public void onPlayerRespawn(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent event) {
+        // Player respawned - could affect echo resonance
+    }
+
+    /**
+     * Record player level up (experience)
+     */
+    @SubscribeEvent
+    public void onPlayerXpChange(net.neoforged.neoforge.event.entity.player.PlayerEvent.XpChangeEvent event) {
+        // Optional: track progression
     }
 }

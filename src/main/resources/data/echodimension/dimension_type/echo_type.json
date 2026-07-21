@@ -1,0 +1,18 @@
+{
+  "height": 384,
+  "height_factor": 0,
+  "min_y": -64,
+  "logical_height": 384,
+  "infiniburn": "minecraft:infiniburn_overworld",
+  "effects": "echodimension:echo_sky",
+  "ambient_light": 0.0,
+  "bed_works": false,
+  "respawn_anchor_works": false,
+  "has_raids": false,
+  "min_y_from_top": 0,
+  "y_carver_range": 32,
+  "monster_spawn_light_level": {
+    "type": "minecraft:constant",
+    "value": 0
+  }
+}

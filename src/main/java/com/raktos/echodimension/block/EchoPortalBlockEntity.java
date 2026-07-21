@@ -1,41 +1,28 @@
 package com.raktos.echodimension.block;
 
 import com.raktos.echodimension.EchoDimensionMod;
+import com.raktos.echodimension.data.PlayerEchoData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.UUID;
 
 /**
- * Echo Portal Block Entity - Stores portal state and player tracking
+ * Echo Portal Block Entity - Stores portal state and echo count
  */
 public class EchoPortalBlockEntity extends BlockEntity {
 
     private UUID activatingPlayer;
     private long activationTime;
-    private int echoCount; // Number of echoes at this portal
     private boolean isActive;
-
-    // Register block entity type via DeferredRegister
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
-            net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            EchoDimensionMod.MOD_ID
-    );
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EchoPortalBlockEntity>> BLOCK_ENTITY_TYPE = 
-            BLOCK_ENTITIES.register("echo_portal_block_entity", () -> 
-                    BlockEntityType.Builder.of(EchoPortalBlockEntity::new, 
-                            com.raktos.echodimension.block.EchoPortalBlock.BLOCK.get()).build(null)
-            );
+    private int echoCount = 0;
 
     public EchoPortalBlockEntity(BlockPos pos, BlockState state) {
-        super(BLOCK_ENTITY_TYPE.get(), pos, state);
+        super(EchoDimensionMod.BLOCK_ENTITY_TYPES.get().getValue(EchoDimensionMod.location("echo_portal_block_entity")), pos, state);
     }
 
     /**
@@ -53,9 +40,9 @@ public class EchoPortalBlockEntity extends BlockEntity {
      */
     public Component getStatus() {
         if (!isActive) {
-            return Component.literal("§7Inactive Portal");
+            return Component.literal("Portal Inactive");
         }
-        return Component.literal("§dActive Portal §7- §e" + echoCount + " echoes recorded");
+        return Component.literal("Portal Active - " + echoCount + " echoes recorded");
     }
 
     /**

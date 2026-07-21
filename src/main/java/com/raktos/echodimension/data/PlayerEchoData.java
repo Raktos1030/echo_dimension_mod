@@ -1,55 +1,53 @@
 package com.raktos.echodimension.data;
 
 import com.raktos.echodimension.EchoDimensionMod;
-import com.raktos.echodimension.dimension.EchoDimension;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Player Echo Data - Stores all recorded echoes for each player
- * Persisted per player via NBT, tracks their gameplay history
+ * PlayerEchoData - Stores echo recordings per player via NBT persistence
+ * 
+ * Records player actions in the Overworld that create echoes in the Echo Dimension:
+ * - Structures built
+ * - Mobs killed
+ * - Resources mined
+ * - Repairs performed
  */
 public class PlayerEchoData {
 
-    public static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final String DATA_KEY = "echodimension_data";
+    // Persistent data key
+    public static final String DATA_KEY = "EchoDimensionData";
 
-    public static void register(net.neoforged.bus.api.IEventBus bus) {
-        // Player data saving/loading is handled by PlayerEvent events
-    }
-
+    // Echo counts
     private int structureCount = 0;
     private int killCount = 0;
     private int resourceCount = 0;
     private int repairCount = 0;
 
-    // Lists of recorded echoes (stores counts)
+    // Detailed echo tracking
     private final Map<String, Integer> echoTypes = new HashMap<>();
+    private final Map<String, Integer> mobEchoes = new HashMap<>();
+    private final Map<String, Integer> blockEchoes = new HashMap<>();
 
     /**
      * Get PlayerEchoData for a server player
      */
     public static PlayerEchoData get(ServerPlayer player) {
+        PlayerEchoData playerData = new PlayerEchoData();
+        
         CompoundTag data = player.getPersistentData();
-        String key = DATA_KEY;
-
-        if (!data.contains(key)) {
-            data.put(key, new CompoundTag());
+        if (!data.contains(DATA_KEY)) {
+            data.put(DATA_KEY, new CompoundTag());
         }
 
-        CompoundTag echoTag = data.getCompound(key);
-        PlayerEchoData playerData = new PlayerEchoData();
+        CompoundTag echoTag = data.getCompound(DATA_KEY);
         playerData.load(echoTag);
 
         return playerData;
@@ -67,6 +65,14 @@ public class PlayerEchoData {
         CompoundTag typesTag = new CompoundTag();
         echoTypes.forEach(typesTag::putInt);
         tag.put("echoTypes", typesTag);
+
+        CompoundTag mobTag = new CompoundTag();
+        mobEchoes.forEach(mobTag::putInt);
+        tag.put("mobEchoes", mobTag);
+
+        CompoundTag blockTag = new CompoundTag();
+        blockEchoes.forEach(blockTag::putInt);
+        tag.put("blockEchoes", blockTag);
     }
 
     /**
@@ -80,7 +86,23 @@ public class PlayerEchoData {
 
         if (tag.contains("echoTypes")) {
             CompoundTag typesTag = tag.getCompound("echoTypes");
-            typesTag.getAllKeys().forEach(key -> echoTypes.put(key, typesTag.getInt(key)));
+            typesTag.getAllKeys().forEach(key -> 
+                echoTypes.put(key, typesTag.getInt(key))
+            );
+        }
+
+        if (tag.contains("mobEchoes")) {
+            CompoundTag mobTag = tag.getCompound("mobEchoes");
+            mobTag.getAllKeys().forEach(key ->
+                mobEchoes.put(key, mobTag.getInt(key))
+            );
+        }
+
+        if (tag.contains("blockEchoes")) {
+            CompoundTag blockTag = tag.getCompound("blockEchoes");
+            blockTag.getAllKeys().forEach(key ->
+                blockEchoes.put(key, blockTag.getInt(key))
+            );
         }
     }
 
@@ -90,7 +112,7 @@ public class PlayerEchoData {
     public void recordStructure(String structureType, ServerPlayer player) {
         structureCount++;
         echoTypes.merge(structureType, 1, Integer::sum);
-        LOGGER.info("Echo recorded: {} by {}", player.getName().getString(), structureType);
+        blockEchoes.merge(structureType, 1, Integer::sum);
         saveToPlayer(player);
     }
 
@@ -99,8 +121,7 @@ public class PlayerEchoData {
      */
     public void recordKill(String entityType, ServerPlayer player) {
         killCount++;
-        echoTypes.merge("kill_" + entityType, 1, Integer::sum);
-        LOGGER.info("Kill echo: {} killed {}", player.getName().getString(), entityType);
+        mobEchoes.merge(entityType, 1, Integer::sum);
         saveToPlayer(player);
     }
 
@@ -109,17 +130,15 @@ public class PlayerEchoData {
      */
     public void recordResource(String blockType, ServerPlayer player) {
         resourceCount++;
-        echoTypes.merge("resource_" + blockType, 1, Integer::sum);
-        LOGGER.info("Resource echo: {} mined {}", player.getName().getString(), blockType);
+        blockEchoes.merge(blockType, 1, Integer::sum);
         saveToPlayer(player);
     }
 
     /**
-     * Record a repair
+     * Record a repair action
      */
-    public void recordRepair(String echoType, ServerPlayer player) {
+    public void recordRepair(ServerPlayer player) {
         repairCount++;
-        LOGGER.info("Echo repaired: {} repaired {}", player.getName().getString(), echoType);
         saveToPlayer(player);
     }
 
@@ -135,10 +154,20 @@ public class PlayerEchoData {
         data.put(DATA_KEY, echoTag);
     }
 
+    /**
+     * Check if player has any echoes
+     */
+    public boolean hasAnyEchoes() {
+        return structureCount > 0 || killCount > 0 || resourceCount > 0;
+    }
+
     // Getters
     public int getStructureCount() { return structureCount; }
     public int getKillCount() { return killCount; }
     public int getResourceCount() { return resourceCount; }
     public int getRepairCount() { return repairCount; }
-    public boolean hasAnyEchoes() { return structureCount + killCount + resourceCount > 0; }
+    public int getTotalEchoes() { return structureCount + killCount + resourceCount; }
+
+    public Map<String, Integer> getMobEchoes() { return mobEchoes; }
+    public Map<String, Integer> getBlockEchoes() { return blockEchoes; }
 }
