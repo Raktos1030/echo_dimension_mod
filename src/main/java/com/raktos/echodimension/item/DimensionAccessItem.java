@@ -2,6 +2,7 @@ package com.raktos.echodimension.item;
 
 import com.raktos.echodimension.data.PlayerEchoData;
 import com.raktos.echodimension.EchoDimensionMod;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -12,7 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class DimensionAccessItem extends Item {
-    public static final Item ECHO_PORTAL_ITEM = EchoDimensionMod.ITEMS.register("echo_portal_item",
+    // FIX NeoForge 1.21: use Holder<Item> instead of Item
+    public static final Holder<Item> ECHO_PORTAL_ITEM = EchoDimensionMod.ITEMS.register("echo_portal_item",
             () -> new DimensionAccessItem(
                     new Properties().stacksTo(1).durability(100)
             ));

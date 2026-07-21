@@ -3,6 +3,7 @@ package com.raktos.echodimension.block;
 import com.raktos.echodimension.EchoDimensionMod;
 import com.raktos.echodimension.dimension.EchoDimension;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +16,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 
 public class EchoPortalBlock extends Block implements EntityBlock {
-    public static final Block BLOCK = EchoDimensionMod.BLOCKS.register("echo_portal_block",
+    // FIX NeoForge 1.21: use Holder<Block> instead of Block
+    public static final Holder<Block> BLOCK = EchoDimensionMod.BLOCKS.register("echo_portal_block",
             () -> new EchoPortalBlock(
                     BlockBehaviour.Properties.of()
                             .mapColor(MapColor.COLOR_PURPLE)

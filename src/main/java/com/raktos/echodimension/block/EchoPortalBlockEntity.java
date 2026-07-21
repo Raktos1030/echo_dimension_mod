@@ -15,7 +15,8 @@ public class EchoPortalBlockEntity extends BlockEntity {
     public static final BlockEntityType<EchoPortalBlockEntity> TYPE =
             EchoDimensionMod.BLOCK_ENTITY_TYPES.register("echo_portal_block",
                     () -> BlockEntityType.Builder.of(EchoPortalBlockEntity::new,
-                            EchoPortalBlock.BLOCK.get()).build(null));
+                            // FIX NeoForge 1.21: BLOCK is now Holder<Block>, use .value()
+                            EchoPortalBlock.BLOCK.value()).build(null));
 
     @Nullable
     private java.util.UUID activatingPlayer;

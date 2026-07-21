@@ -2,9 +2,11 @@ package com.raktos.echodimension.event;
 
 import com.raktos.echodimension.data.PlayerEchoData;
 import com.raktos.echodimension.dimension.EchoDimension;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -16,16 +18,17 @@ public class PlayerActionRecorder {
     }
 
     public static void onBlockBroken(BlockEvent.BreakEvent event) {
-        Level level = event.getLevel();
+        // FIX NeoForge 1.21: BlockEvent uses LevelAccessor, not Level
+        LevelAccessor level = event.getLevel();
         if (level.isClientSide()) return;
 
         Player player = event.getPlayer();
         if (player == null) return;
-        if (!EchoDimension.isEchoDimension(level)) return;
+        if (!EchoDimension.isEchoDimension((Level) level)) return;
         if (!(player instanceof ServerPlayer serverPlayer)) return;
 
-        // FIX: use .getKey() instead of .unwrapKey().map(...).orElse(...)
-        String blockType = event.getState().getBlock().getKey()
+        // FIX NeoForge 1.21: Entity.getType().getKey() returns ResourceKey, use .location()
+        String blockType = BuiltInRegistries.BLOCK.getKey(event.getState().getBlock())
                 .location()
                 .toString();
 
@@ -39,7 +42,8 @@ public class PlayerActionRecorder {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
         if (EchoDimension.isEchoDimension(level)) return;
 
-        String entityType = event.getEntity().getType().getKey()
+        // FIX NeoForge 1.21: EntityType.getKey() returns ResourceKey, use .location()
+        String entityType = BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType())
                 .location()
                 .toString();
 

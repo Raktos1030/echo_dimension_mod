@@ -21,9 +21,10 @@ public class EchoDimensionProvider {
     }
 
     public static LevelStem createStem(ServerLevel world) {
-        var dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).asGetter();
-        var noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS).asGetter();
-        var biomes = world.registryAccess().registryOrThrow(Registries.BIOME).asGetter();
+        // FIX NeoForge 1.21: registryAccess().registryOrThrow() returns HolderGetter directly
+        var dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
+        var noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS);
+        var biomes = world.registryAccess().registryOrThrow(Registries.BIOME);
 
         Holder<DimensionType> dimType = dimTypes.getOrThrow(getEchoDimTypeKey());
         Holder<NoiseGeneratorSettings> genSettings = noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
