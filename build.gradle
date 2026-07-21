@@ -23,13 +23,8 @@ java {
     withJavadocJar()
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs += 'src/main/resources'
-        }
-    }
-}
+// FIX: Remove duplicate sourceSets that double-scans resources
+// NeoGradle handles resources automatically, no need for custom srcDirs
 
 repositories {
     maven {
@@ -96,3 +91,6 @@ processResources {
     }
 }
 
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
