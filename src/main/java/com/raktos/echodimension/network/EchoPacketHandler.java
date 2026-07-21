@@ -15,12 +15,13 @@ public class EchoPacketHandler {
             ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_channel");
     public static final int PROTOCOL_VERSION = 1;
 
+    // Follows NeoForge 1.21.x docs exactly: https://docs.neoforged.net/docs/networking/payload/
     public record SyncEchoDataPayload(int structures, int kills, int resources) implements CustomPacketPayload {
         public static final ResourceLocation ID =
                 ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "sync_echo_data");
 
-        public static final Id<SyncEchoDataPayload> ID_TYPE = new Id<>(ID);
-        public static final Type<SyncEchoDataPayload> TYPE = new Type<>(ID_TYPE);
+        public static final Type<SyncEchoDataPayload> TYPE =
+                new Type<>(ID);
 
         public static final StreamCodec<FriendlyByteBuf, SyncEchoDataPayload> STREAM_CODEC =
                 StreamCodec.composite(
@@ -34,8 +35,8 @@ public class EchoPacketHandler {
                 );
 
         @Override
-        public Id<? extends CustomPacketPayload> type() {
-            return ID_TYPE;
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
         }
     }
 
