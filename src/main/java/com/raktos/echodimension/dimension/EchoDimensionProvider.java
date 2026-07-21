@@ -21,9 +21,9 @@ public class EchoDimensionProvider {
     }
 
     public static LevelStem createStem(ServerLevel world) {
-        HolderGetter<DimensionType> dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
-        HolderGetter<NoiseGeneratorSettings> noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS);
-        HolderGetter<Biome> biomes = world.registryAccess().registryOrThrow(Registries.BIOME);
+        var dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).asGetter();
+        var noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS).asGetter();
+        var biomes = world.registryAccess().registryOrThrow(Registries.BIOME).asGetter();
 
         Holder<DimensionType> dimType = dimTypes.getOrThrow(getEchoDimTypeKey());
         Holder<NoiseGeneratorSettings> genSettings = noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
@@ -31,8 +31,6 @@ public class EchoDimensionProvider {
         Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.FOREST);
         BiomeSource biomeSource = new FixedBiomeSource(echoBiome);
 
-        // NeoForge 1.21.x: NoiseBasedChunkGenerator(BiomeSource, Holder<NoiseGeneratorSettings>) — 2 params only
-        // Source: https://nekoyue.github.io/ForgeJavaDocs-NG/javadoc/1.21.x-neoforge/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.html
         NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(
                 biomeSource, genSettings
         );

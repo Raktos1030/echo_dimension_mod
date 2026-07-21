@@ -2,7 +2,6 @@ package com.raktos.echodimension.event;
 
 import com.raktos.echodimension.data.PlayerEchoData;
 import com.raktos.echodimension.dimension.EchoDimension;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -25,10 +24,10 @@ public class PlayerActionRecorder {
         if (!EchoDimension.isEchoDimension(level)) return;
         if (!(player instanceof ServerPlayer serverPlayer)) return;
 
-        String blockType = event.getState().getBlockHolder()
-                .unwrapKey()
-                .map(k -> k.location().toString())
-                .orElse("minecraft:stone");
+        // FIX: use .getKey() instead of .unwrapKey().map(...).orElse(...)
+        String blockType = event.getState().getBlock().getKey()
+                .location()
+                .toString();
 
         PlayerEchoData.get(serverPlayer).recordResource(blockType, serverPlayer);
     }
@@ -40,10 +39,9 @@ public class PlayerActionRecorder {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
         if (EchoDimension.isEchoDimension(level)) return;
 
-        String entityType = event.getEntity().getType()
-                .unwrapKey()
-                .map(k -> k.location().toString())
-                .orElse("minecraft:pig");
+        String entityType = event.getEntity().getType().getKey()
+                .location()
+                .toString();
 
         PlayerEchoData.get(player).recordKill(entityType, player);
     }
