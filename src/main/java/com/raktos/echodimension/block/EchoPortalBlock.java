@@ -34,10 +34,8 @@ public class EchoPortalBlock extends Block implements EntityBlock {
 
     public static final DeferredHolder<Block, EchoPortalBlock> BLOCK = 
             net.neoforged.neoforge.registries.DeferredHolder.create(
-                    net.neoforged.neoforge.registries.DeferredReference.hold(
-                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_portal_block"),
-                            new EchoPortalBlock()
-                    )
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_portal_block"),
+                    EchoPortalBlock::new
             );
 
     public EchoPortalBlock() {
@@ -118,7 +116,6 @@ public class EchoPortalBlock extends Block implements EntityBlock {
 
         // Create teleport event
         net.minecraft.server.level.ServerPlayer serverPlayer = (net.minecraft.server.level.ServerPlayer) player;
-        net.minecraft.world.teleport.PortalForcer portalForcer = new net.minecraft.world.teleport.PortalForcer(serverPlayer);
 
         // Perform teleport with portal mechanics
         serverPlayer.teleportTo(targetLevel, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 

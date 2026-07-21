@@ -69,11 +69,4 @@ public class EchoDimensionProvider {
 
         return new NoiseBasedChunkGenerator(biomeSource, noiseRouter, generationShapeConfig);
     }
-
-    /**
-     * Gets the dimensions for registration
-     */
-    public static List<WorldDimensions.BonusChestInfo> getBonusChestLoot() {
-        return List.of();
-    }
 }

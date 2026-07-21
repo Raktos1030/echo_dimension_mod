@@ -1,16 +1,12 @@
 package com.raktos.echodimension.dimension;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.Dimension;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import org.joml.Vector3f;
 
 /**
  * Echo Dimension - The dark reflection of the Overworld
@@ -22,7 +18,7 @@ public class EchoDimension {
             ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo")
     );
 
-    public static final DeferredHolder<DimensionType, EchoDimensionType> DIMENSION_TYPE = EchoDimensionType.DIMENSION_TYPE;
+    public static final DeferredHolder<DimensionType, EchoDimensionType> DIMENSION_TYPE = EchoDimensionType.DIMENSION_TYPE_HOLDER;
 
     // Custom chunk generator for Echo Dimension
     public static final ResourceKey<DimensionType> DIMENSION_TYPE_KEY = ResourceKey.create(

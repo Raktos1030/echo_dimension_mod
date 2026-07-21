@@ -4,9 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.RegistryDataPackCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.NoiseColumn;
@@ -34,23 +32,17 @@ public class EchoChunkGenerator extends ChunkGenerator {
             instance -> instance.group(
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(EchoChunkGenerator::getBiomeSource),
                     NoiseRouter.CODEC.fieldOf("noise_router").forGetter(gen -> gen.noiseRouter),
-                    GenerationShapeConfig.CODEC.fieldOf("generation_shape_settings").forGetter(gen -> gen.generationShapeConfig),
-                    WorldgenContext.CODEC.optionalFieldOf("worldgen_context").forGetter(gen -> Optional.of(gen.context))
+                    GenerationShapeConfig.CODEC.fieldOf("generation_shape_settings").forGetter(gen -> gen.generationShapeConfig)
             ).apply(instance, instance.stable(EchoChunkGenerator::new))
     );
 
     private final NoiseRouter noiseRouter;
     private final GenerationShapeConfig generationShapeConfig;
-    private final WorldgenContext context;
-    private final EchoTerrainModifier terrainModifier;
 
-    public EchoChunkGenerator(BiomeSource biomeSource, NoiseRouter noiseRouter, 
-                              GenerationShapeConfig config, WorldgenContext context) {
-        super(biomeSource, biomeSource, context.getLevel().registryAccess(), config);
+    public EchoChunkGenerator(BiomeSource biomeSource, NoiseRouter noiseRouter, GenerationShapeConfig config) {
+        super(biomeSource, biomeSource);
         this.noiseRouter = noiseRouter;
         this.generationShapeConfig = config;
-        this.context = context != null ? context : new WorldgenContext();
-        this.terrainModifier = new EchoTerrainModifier();
     }
 
     @Override
@@ -61,8 +53,7 @@ public class EchoChunkGenerator extends ChunkGenerator {
     @Override
     public void buildSurface(WorldGenRegion region, StructureManager structures, ChunkGeneratorConfiguration config, 
                              net.minecraft.world.level.chunk.Chunk chunk) {
-        // Apply echo-specific surface modifications
-        terrainModifier.applyEchoSurface(region, chunk);
+        // Echo-specific surface modifications will be added here
     }
 
     @Override
@@ -112,39 +103,4 @@ public class EchoChunkGenerator extends ChunkGenerator {
                                    WorldGenRegion region) {
         // Optional: add echo-specific features
     }
-
-    /**
-     * Terrain modifier for Echo Dimension
-     * Creates darker, more distorted terrain
-     */
-    private static class EchoTerrainModifier {
-        public void applyEchoSurface(WorldGenRegion region, net.minecraft.world.level.chunk.Chunk chunk) {
-            // Place echo stone at varying depths
-            // Create ghostly, distorted terrain appearance
-        }
-    }
-}
-
-/**
- * Context for world generation
- */
-class WorldgenContext implements net.minecraft.core.ContextHolder {
-    private final net.minecraft.server.level.ServerLevel level;
-    
-    public WorldgenContext(net.minecraft.server.level.ServerLevel level) {
-        this.level = level;
-    }
-
-    public net.minecraft.server.level.ServerLevel getLevel() {
-        return level;
-    }
-
-    @Override
-    public <T> T get(net.minecraft.core.Registry<T> registry) {
-        return level.registryAccess().registry(registry).orElse(null);
-    }
-
-    public static final Codec<WorldgenContext> CODEC = RecordCodecBuilder.create(
-            instance -> instance.apply(instance, WorldgenContext::new)
-    );
 }

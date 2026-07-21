@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.UUID;
@@ -19,11 +20,7 @@ public class EchoPortalBlockEntity extends BlockEntity {
     private int echoCount; // Number of echoes at this portal
     private boolean isActive;
 
-    public EchoPortalBlockEntity(BlockPos pos, BlockState state) {
-        super(EchoPortalBlockEntity.BLOCK_ENTITY, pos, state);
-    }
-
-    public static final net.neoforged.neoforge.registries.DeferredHolder<BlockEntityType<?>, BlockEntityType<EchoPortalBlockEntity>> BLOCK_ENTITY = 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EchoPortalBlockEntity>> BLOCK_ENTITY_TYPE = 
             net.neoforged.neoforge.registries.DeferredRegister.create(
                     net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE,
                     EchoDimensionMod.MOD_ID
@@ -32,6 +29,10 @@ public class EchoPortalBlockEntity extends BlockEntity {
                     () -> BlockEntityType.Builder.of(EchoPortalBlockEntity::new, 
                             com.raktos.echodimension.block.EchoPortalBlock.BLOCK.get()).build(null)
             );
+
+    public EchoPortalBlockEntity(BlockPos pos, BlockState state) {
+        super(BLOCK_ENTITY_TYPE.get(), pos, state);
+    }
 
     /**
      * Activate the portal with a player
