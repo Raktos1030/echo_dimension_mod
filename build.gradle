@@ -12,34 +12,7 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
-}
-
-neoforge {
-    runs {
-        defaults {
-            logLevel = net.neoforged.gradle.userdev.logging.UserdevLogLevel.DEBUG
-            property('forge.logging.markers', 'REGEX')
-            property('forge.logging.console.level', 'debug')
-            gameTestRegister = net.neoforged.fgbi.TestFramework.registerGameTestTask(tasks.named('gameTest'))
-        }
-
-        client {
-            client()
-            programArgument('--nogui')
-        }
-
-        server {
-            server()
-        }
-
-        data {
-            data()
-            property('forge.mapping.sourceOnly', 'true')
-        }
-    }
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 sourceSets.main {
     resources {
@@ -55,13 +28,46 @@ repositories {
 }
 
 dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
     implementation 'org.jetbrains:annotations:24.1.0'
+}
+
+// Default run configurations.
+runs {
+    configureEach {
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        modSource project.sourceSets.main
+    }
+
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        argument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 tasks.named('processResources') {
     var replaceProperties = [
             minecraft_version   : minecraft_version,
-            neoform_version     : neoform_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version        : neo_version,
             loader_version_range: loader_version_range,
             mod_id              : mod_id,
             mod_name            : mod_name,
@@ -73,7 +79,9 @@ tasks.named('processResources') {
     ]
     inputs.properties replaceProperties
 
-    expand replaceProperties
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
 }
 
 tasks.named('sourcesJar', JavaCompile) {
