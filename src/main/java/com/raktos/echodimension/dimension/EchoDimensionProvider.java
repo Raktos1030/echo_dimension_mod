@@ -1,5 +1,6 @@
 package com.raktos.echodimension.dimension;
 
+import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
@@ -23,14 +24,19 @@ public class EchoDimensionProvider {
     public static LevelStem createStem(ServerLevel world) {
         HolderGetter<DimensionType> dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS);
-        HolderGetter<StructureSet> structureSets = world.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
+        HolderGetter<StructureSet> structureSetGetter = world.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
         HolderGetter<Biome> biomes = world.registryAccess().registryOrThrow(Registries.BIOME);
 
         Holder<DimensionType> dimType = dimTypes.getOrThrow(getEchoDimTypeKey());
         Holder<NoiseGeneratorSettings> genSettings = noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 
-        Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.DARK_OAK_HILLS);
+        Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.FOREST);
         BiomeSource biomeSource = new FixedBiomeSource(echoBiome);
+
+        // 1.21.1: NoiseBasedChunkGenerator(BiomeSource, StructureSet[], NoiseGeneratorSettings)
+        StructureSet[] structureSets = structureSetGetter.listElementIds()
+                .map(id -> structureSetGetter.getOrThrow(id))
+                .toArray(StructureSet[]::new);
 
         NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(
                 biomeSource, structureSets, genSettings);
