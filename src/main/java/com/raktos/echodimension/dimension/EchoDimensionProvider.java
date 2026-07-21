@@ -5,20 +5,20 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.FixedBiomeSource;
-import net.minecraft.resources.ResourceLocation;
 
 public class EchoDimensionProvider {
-    public static final ResourceKey<DimensionType> ECHO_DIM_TYPE_KEY = ResourceKey.create(
-            Registries.DIMENSION_TYPE, new ResourceLocation(EchoDimension.MOD_ID, "echo_type"));
+    public static ResourceKey<DimensionType> getEchoDimTypeKey() {
+        return ResourceKey.create(Registries.DIMENSION_TYPE,
+                EchoDimensionMod.location("echo_type"));
+    }
 
     public static LevelStem createStem(ServerLevel world) {
         HolderGetter<DimensionType> dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
@@ -26,13 +26,10 @@ public class EchoDimensionProvider {
         HolderGetter<StructureSet> structureSets = world.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
         HolderGetter<Biome> biomes = world.registryAccess().registryOrThrow(Registries.BIOME);
 
-        Holder<DimensionType> dimType = dimTypes.getOrThrow(ECHO_DIM_TYPE_KEY);
+        Holder<DimensionType> dimType = dimTypes.getOrThrow(getEchoDimTypeKey());
         Holder<NoiseGeneratorSettings> genSettings = noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 
-        Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.DARK_OAKS)
-                .or(() -> biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS))
-                .orElseThrow();
-
+        Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.DARK_OAK_HILLS);
         BiomeSource biomeSource = new FixedBiomeSource(echoBiome);
 
         NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(

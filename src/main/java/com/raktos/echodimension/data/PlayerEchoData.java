@@ -1,6 +1,5 @@
 package com.raktos.echodimension.data;
 
-import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -15,22 +14,23 @@ public class PlayerEchoData {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final String DATA_KEY = "EchoDimensionData";
 
-    private int structureCount = 0;
-    private int killCount = 0;
-    private int resourceCount = 0;
-    private int repairCount = 0;
-    private final Map<String, Integer> echoTypes = new HashMap<>();
+    private int structureCount;
+    private int killCount;
+    private int resourceCount;
+    private int repairCount;
     private final Map<String, Integer> mobEchoes = new HashMap<>();
     private final Map<String, Integer> blockEchoes = new HashMap<>();
 
     public static void register(IEventBus bus) {
-        bus.addListener(PlayerEvent.PlayerLoggedInEvent.class, event -> {
-            if (event.getEntity() instanceof ServerPlayer player) {
-                PlayerEchoData data = get(player);
-                LOGGER.info("Player {} joined with {} echoes",
-                        player.getName().getString(), data.getTotalEchoes());
-            }
-        });
+        bus.addListener(PlayerEchoData::onPlayerLoggedIn);
+    }
+
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            PlayerEchoData data = get(player);
+            LOGGER.info("Player {} joined with {} echoes",
+                    player.getName().getString(), data.getTotalEchoes());
+        }
     }
 
     public static PlayerEchoData get(ServerPlayer player) {
@@ -42,7 +42,7 @@ public class PlayerEchoData {
         return playerData;
     }
 
-    private void saveToPlayer(ServerPlayer player) {
+    public void saveToPlayer(ServerPlayer player) {
         CompoundTag data = player.getPersistentData();
         CompoundTag echoTag = new CompoundTag();
         save(echoTag);
@@ -92,6 +92,6 @@ public class PlayerEchoData {
     public int getRepairCount() { return repairCount; }
     public int getTotalEchoes() { return structureCount + killCount + resourceCount; }
     public boolean hasAnyEchoes() { return structureCount > 0 || killCount > 0 || resourceCount > 0; }
-    public Map<String, Integer> getMobEchoes() { return mobEchoes; }
-    public Map<String, Integer> getBlockEchoes() { return blockEchoes; }
+    public Map<String, Integer> getMobEchoes() { return new HashMap<>(mobEchoes); }
+    public Map<String, Integer> getBlockEchoes() { return new HashMap<>(blockEchoes); }
 }
