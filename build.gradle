@@ -95,9 +95,3 @@ processResources {
     }
 }
 
-afterEvaluate {
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
-}
