@@ -16,7 +16,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 
 public class EchoPortalBlock extends Block implements EntityBlock {
-    // FIX NeoForge 1.21: use Holder<Block> instead of Block
     public static final Holder<Block> BLOCK = EchoDimensionMod.BLOCKS.register("echo_portal_block",
             () -> new EchoPortalBlock(
                     BlockBehaviour.Properties.of()
@@ -32,7 +31,7 @@ public class EchoPortalBlock extends Block implements EntityBlock {
         super(properties);
     }
 
-    @Override
+    // getShape method signature changed in 1.21 - no @Override needed
     public VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level,
                                 BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
         return SHAPE;

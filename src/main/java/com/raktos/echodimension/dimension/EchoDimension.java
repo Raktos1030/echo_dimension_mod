@@ -19,7 +19,7 @@ public class EchoDimension {
             Registries.DIMENSION_TYPE, EchoDimensionMod.MOD_ID);
 
     public static final DeferredHolder<DimensionType, DimensionType> ECHO_DIMENSION_TYPE =
-            DIMENSION_KEYS.register("echo_type", () -> DimensionType.Builder.create()
+            DIMENSION_KEYS.register("echo_type", () -> new DimensionType.Builder()
                     .hasSkylight(true)
                     .hasCeiling(false)
                     .ultraWarm(false)

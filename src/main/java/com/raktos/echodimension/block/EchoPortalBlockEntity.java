@@ -2,24 +2,26 @@ package com.raktos.echodimension.block;
 
 import com.raktos.echodimension.EchoDimensionMod;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class EchoPortalBlockEntity extends BlockEntity {
     public static final BlockEntityType<EchoPortalBlockEntity> TYPE =
             EchoDimensionMod.BLOCK_ENTITY_TYPES.register("echo_portal_block",
                     () -> BlockEntityType.Builder.of(EchoPortalBlockEntity::new,
-                            // FIX NeoForge 1.21: BLOCK is now Holder<Block>, use .value()
-                            EchoPortalBlock.BLOCK.value()).build(null));
+                            EchoPortalBlock.BLOCK).build(null));
 
     @Nullable
-    private java.util.UUID activatingPlayer;
+    private UUID activatingPlayer;
     private long activationTime;
     private boolean isActive;
     private int echoCount;
@@ -28,7 +30,7 @@ public class EchoPortalBlockEntity extends BlockEntity {
         super(TYPE, pos, state);
     }
 
-    public void activate(@Nullable java.util.UUID playerId) {
+    public void activate(@Nullable UUID playerId) {
         this.activatingPlayer = playerId;
         this.activationTime = System.currentTimeMillis();
         this.isActive = true;
@@ -48,7 +50,7 @@ public class EchoPortalBlockEntity extends BlockEntity {
     public int getEchoCount() { return echoCount; }
 
     @Nullable
-    public java.util.UUID getActivatingPlayer() { return activatingPlayer; }
+    public UUID getActivatingPlayer() { return activatingPlayer; }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
