@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.UUID;
 
@@ -20,13 +22,15 @@ public class EchoPortalBlockEntity extends BlockEntity {
     private int echoCount; // Number of echoes at this portal
     private boolean isActive;
 
+    // Register block entity type via DeferredRegister
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            EchoDimensionMod.MOD_ID
+    );
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EchoPortalBlockEntity>> BLOCK_ENTITY_TYPE = 
-            net.neoforged.neoforge.registries.DeferredRegister.create(
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE,
-                    EchoDimensionMod.MOD_ID
-            ).register(
-                    "echo_portal_block_entity",
-                    () -> BlockEntityType.Builder.of(EchoPortalBlockEntity::new, 
+            BLOCK_ENTITIES.register("echo_portal_block_entity", () -> 
+                    BlockEntityType.Builder.of(EchoPortalBlockEntity::new, 
                             com.raktos.echodimension.block.EchoPortalBlock.BLOCK.get()).build(null)
             );
 

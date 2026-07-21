@@ -13,6 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.Optional;
 
 /**
  * Dimension Access Item - Required to activate Echo Portals
@@ -20,13 +23,16 @@ import net.neoforged.neoforge.registries.DeferredHolder;
  */
 public class DimensionAccessItem extends Item {
 
-    public static final DeferredHolder<Item, DimensionAccessItem> ITEM = 
-            net.neoforged.neoforge.registries.DeferredHolder.create(
-                    net.neoforged.neoforge.registries.DeferredReference.hold(
-                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_portal_item"),
-                            new DimensionAccessItem()
-                    )
-            );
+    // Register items via DeferredRegister
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
+            net.minecraft.core.registries.BuiltInRegistries.ITEM,
+            EchoDimensionMod.MOD_ID
+    );
+
+    public static final DeferredHolder<Item, DimensionAccessItem> ITEM = ITEMS.register(
+            "echo_portal_item",
+            DimensionAccessItem::new
+    );
 
     public DimensionAccessItem() {
         super(new Item.Properties()

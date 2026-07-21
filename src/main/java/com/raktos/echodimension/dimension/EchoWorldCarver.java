@@ -7,9 +7,12 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.carvers.CarverConfiguration;
-import net.minecraft.world.level.levelgen.carvers.CarverDebugSettings;
 import net.minecraft.world.level.levelgen.carvers.CaveWorldCarver;
+import net.minecraft.world.level.levelgen.carvers.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carvers.WorldCarver;
 import net.minecraft.world.level.levelgen.heightmaps.Heightmap;
+
+import java.util.Random;
 
 /**
  * Echo World Carver - Custom cave generation for Echo Dimension
@@ -23,16 +26,18 @@ public class EchoWorldCarver extends CaveWorldCarver {
             ).apply(instance, EchoWorldCarver::new)
     );
 
-    // Echo Dimension uses standard generation but with modifications
-    public static final ResourceKey<net.minecraft.world.level.levelgen.carvers.CarverDebugSettings> ECHO_CAVE_CARVER = net.minecraft.resources.ResourceKey.create(
-            net.minecraft.core.registries.BuiltInRegistries.CARVER,
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_cave")
-    );
+    // ResourceKey for custom carvers (points to BuiltInRegistries.CARVER)
+    public static final net.minecraft.resources.ResourceKey<WorldCarver<?>> ECHO_CAVE_CARVER = 
+            net.minecraft.resources.ResourceKey.create(
+                    net.minecraft.core.registries.BuiltInRegistries.CARVER,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_cave")
+            );
 
-    public static final ResourceKey<net.minecraft.world.level.levelgen.carvers.CarverDebugSettings> ECHO_NETHER_CAVE_CARVER = net.minecraft.resources.ResourceKey.create(
-            net.minecraft.core.registries.BuiltInRegistries.CARVER,
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_nether_cave")
-    );
+    public static final net.minecraft.resources.ResourceKey<WorldCarver<?>> ECHO_NETHER_CAVE_CARVER = 
+            net.minecraft.resources.ResourceKey.create(
+                    net.minecraft.core.registries.BuiltInRegistries.CARVER,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(EchoDimensionMod.MOD_ID, "echo_nether_cave")
+            );
 
     public EchoWorldCarver(CarverConfiguration config) {
         super(config);

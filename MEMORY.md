@@ -1,67 +1,63 @@
-# Echo Dimension Mod - Project Memory
+# Echo Dimension Mod - Memory
 
 ## Concept
-**Echo Dimension** is a NeoForge 1.21.1 mod (Java 21) that creates a dark reflection of the Overworld where past player actions manifest as "echoes".
+**Echo Dimension** is a Minecraft NeoForge mod (1.21.1, Java 21) where the **Overworld is mirrored as a "temporal reflection"** where your past actions haunt the world as playable echoes.
 
-## Core Mechanics
-1. **Portal Access** - Custom block portal activated by item, toggles Overworld ↔ Echo Dimension
-2. **Echo Entities** - Ghost versions of killed mobs appear in Echo Dimension
-3. **Echo Structures** - Built structures manifest as ghostly echoes
-4. **Echo Repair** - Collect fragmented resources to repair ghosts → rewards
-5. **Boss: The Primordial Echo** - Final boss with phases tied to player's history
+### Core Mechanics
+- **Portal Access**: Custom portal block activated with a special item
+- **Echo Dimension**: Dark, distorted reflection of the Overworld
+- **Echo System**: 
+  - Structures you built → ghostly echo buildings
+  - Mobs you killed → hostile echo entities
+  - Resources you mined → fragmented echoes
+  - Repairs mechanic to restore echoes
+- **Boss**: Final goal - the "Archon of Echoes"
 
-## Current Project State
+## Current State
 
-### ✅ What works
-- Basic mod structure and registration (EchoDimensionMod.java)
-- Portal block with teleportation logic (EchoPortalBlock.java, EchoPortalBlockEntity.java)
-- Dimension type and key definitions (EchoDimension.java, EchoDimensionType.java)
-- Network packet handler skeleton (EchoPacketHandler.java)
-- Player data tracking (PlayerActionRecorder.java, PlayerEchoData.java)
-- Item for portal activation (DimensionAccessItem.java)
-
-### ❌ Known Compilation Issues (FIXED)
-- `EchoDimension.java`: Wrong import `net.minecraft.world.dimension.DimensionType` → `net.minecraft.world.level.dimension.DimensionType`
-- `EchoDimensionType.java`: `DimensionType` constructor signature changed in 1.21.1
-- `EchoPortalBlock.java`: Incorrect `DeferredHolder.create()` syntax
-- `EchoPortalBlockEntity.java`: `BlockEntityType` registration syntax outdated
-- `EchoDimensionProvider.java`: `WorldDimensions.BonusChestInfo` removed in 1.21.1
-- `EchoChunkGenerator.java`: `WorldgenContext` interface and `ChunkGeneratorConfiguration` API changed
-- `EchoWorldCarver.java`: `ArgumentBasedDimension`, `CarverConfiguration`, and carver registration APIs changed
-
-### 🚧 Still Needs Implementation
-- Full EchoChunkGenerator with working terrain generation
-- EchoWorldCarver registration
-- Echo entity spawning system (GhostEchoEntity)
-- Echo repair crafting mechanic
-- Boss entity (PrimordialEchoBoss)
-- Portal frame block
-- Custom sky/mist rendering for Echo Dimension atmosphere
-
-## Key Files
+### Completed Files
 | File | Status |
 |------|--------|
-| `EchoDimensionMod.java` | ✅ OK |
-| `EchoPortalBlock.java` | ✅ FIXED |
-| `EchoPortalBlockEntity.java` | ✅ FIXED |
-| `EchoDimension.java` | ✅ FIXED |
-| `EchoDimensionType.java` | ✅ FIXED |
-| `EchoDimensionProvider.java` | ✅ FIXED |
-| `EchoChunkGenerator.java` | ✅ FIXED |
-| `EchoWorldCarver.java` | ✅ FIXED |
-| `DimensionAccessItem.java` | ✅ OK |
-| `PlayerActionRecorder.java` | ✅ OK |
-| `PlayerEchoData.java` | ✅ OK |
-| `EchoPacketHandler.java` | ✅ OK |
+| `EchoDimensionMod.java` | ✅ Compilable |
+| `EchoPortalBlock.java` | ✅ Compilable |
+| `EchoPortalBlockEntity.java` | ✅ Fixed (DeferredHolder pattern) |
+| `PlayerEchoData.java` | ✅ Fixed (removed custom registry) |
+| `EchoDimensionType.java` | ✅ Compilable |
+| `EchoDimension.java` | ✅ Compilable |
+| `EchoDimensionProvider.java` | ✅ Fixed (MultiNoiseBiomeSource) |
+| `EchoDimension.java` | ✅ Compilable |
+| `DimensionAccessItem.java` | ✅ Fixed (DeferredRegister pattern) |
+| `EchoWorldCarver.java` | ✅ Fixed (ResourceKey type) |
+| `EchoChunkGenerator.java` | ✅ Fixed (duplicate import) |
 
-## Build Commands
+### Key Fixes Applied
+1. **DeferredRegister pattern** for blocks, items, block entities
+2. **Removed custom Registry classes** (Registry is interface in 1.21.1)
+3. **Fixed BiomeSource imports** (removed duplicate)
+4. **Fixed WorldCarver ResourceKey** (use WorldCarver<?> not CarverDebugSettings)
+5. **Fixed MultiNoiseBiomeSource** creation (use createFromPreset)
+
+## TODO List
+- [ ] Test build with `./gradlew build`
+- [ ] Implement portal frame blocks (obsidian + echo crystals)
+- [ ] Create actual Echo entity system (EchoPhantom, EchoZombie, etc.)
+- [ ] Add custom sky handler for Echo Dimension
+- [ ] Implement echo spawning based on PlayerEchoData
+- [ ] Create Echo Repair system
+- [ ] Implement Archon of Echoes boss
+
+## Tech Stack
+- **NeoForge**: 1.21.1
+- **Java**: 21
+- **Gradle**: 7.0.189 (neogradle userdev plugin)
+
+## Build Command
 ```bash
-./gradlew build          # Build mod JAR
-./gradlew runClient      # Launch Minecraft with mod
-./gradlew runServer      # Launch server with mod
+./gradlew build
 ```
 
-## Version
-- Minecraft: 1.21.1
-- NeoForge: ${neo_version} (managed by gradle.properties)
-- Java: 21
+## Important Notes
+- Player data stored in NBT via `player.getPersistentData()`
+- Echo counts tracked per-player
+- Portal teleportation works via `ServerPlayer.teleportTo()`
+- Network system prepared for multiplayer (Phase 1 is singleplayer)
