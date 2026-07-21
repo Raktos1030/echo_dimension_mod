@@ -75,6 +75,7 @@ configurations {
 }
 
 processResources {
+    duplicatesStrategy = 'include'
     var replaceProperties = [
             minecraft_version       : minecraft_version,
             minecraft_version_range : minecraft_version_range,
