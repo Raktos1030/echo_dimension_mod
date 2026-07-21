@@ -85,8 +85,8 @@ processResources {
             mod_license             : mod_license,
             mod_version             : mod_version,
             mod_group_id            : mod_group_id,
-            mod_jar_url             : mod_jar_url ?: '',
-            mod_credits             : mod_credits ?: ''
+            mod_jar_url             : project.findProperty('mod_jar_url') ?: '',
+            mod_credits             : project.findProperty('mod_credits') ?: ''
     ]
     inputs.properties replaceProperties
 
@@ -95,7 +95,9 @@ processResources {
     }
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+afterEvaluate {
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
 }
