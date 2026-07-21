@@ -10,7 +10,6 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class EchoDimension {
-    // Fixed: ResourceKey<Level> directly, not ResourceKey<ResourceKey<Level>>
     public static final ResourceKey<Level> DIMENSION_KEY = ResourceKey.create(
             Registries.DIMENSION,
             EchoDimensionMod.location("echo_dimension")
@@ -19,8 +18,6 @@ public class EchoDimension {
     public static final DeferredRegister<DimensionType> DIMENSION_KEYS = DeferredRegister.create(
             Registries.DIMENSION_TYPE, EchoDimensionMod.MOD_ID);
 
-    // Fixed: DimensionType.Builder for 1.21.1
-    // infiniburnLocation now takes a Holder<Block> directly (no more INFINIBURN_OVERWORLD constant)
     public static final DeferredHolder<DimensionType, DimensionType> ECHO_DIMENSION_TYPE =
             DIMENSION_KEYS.register("echo_type", () -> DimensionType.Builder.create()
                     .hasSkylight(true)
@@ -34,7 +31,6 @@ public class EchoDimension {
                     .height(384)
                     .logicalHeight(384)
                     .ambientLight(0.0f)
-                    .infiniburnLocation(net.minecraft.world.level.block.Blocks.OBSIDIAN)
                     .build()
             );
 

@@ -24,7 +24,7 @@ public class EchoDimensionProvider {
     public static LevelStem createStem(ServerLevel world) {
         HolderGetter<DimensionType> dimTypes = world.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseSettings = world.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS);
-        HolderGetter<StructureSet> structureSetGetter = world.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
+        HolderGetter<StructureSet> structureSets = world.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
         HolderGetter<Biome> biomes = world.registryAccess().registryOrThrow(Registries.BIOME);
 
         Holder<DimensionType> dimType = dimTypes.getOrThrow(getEchoDimTypeKey());
@@ -33,8 +33,10 @@ public class EchoDimensionProvider {
         Holder<Biome> echoBiome = biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.FOREST);
         BiomeSource biomeSource = new FixedBiomeSource(echoBiome);
 
-        // 1.21.1: NoiseBasedChunkGenerator(BiomeSource, NoiseGeneratorSettings) - no structure sets
-        NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(biomeSource, genSettings);
+        // NeoForge 1.21.1: NoiseBasedChunkGenerator(BiomeSource, NoiseGeneratorSettings, HolderGetter<StructureSet>)
+        NoiseBasedChunkGenerator chunkGen = new NoiseBasedChunkGenerator(
+                biomeSource, genSettings, structureSets
+        );
 
         return new LevelStem(dimType, chunkGen);
     }
