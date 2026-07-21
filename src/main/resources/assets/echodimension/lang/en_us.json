@@ -1,8 +1,13 @@
 {
-  "item.echodimension.echo_portal_item": "Echo Portal Key",
-  "block.echodimension.echo_portal_block": "Echo Portal Block",
-  "entity.echodimension.player_echo": "Player Echo",
-  "entity.echodimension.mob_echo": "Mob Echo",
-  "dimension.echodimension.echo_dimension": "Echo Dimension",
-  "key.echodimension.open_menu": "Open Echo Menu"
+  "itemGroup.echodimension": "Example Mod Tab",
+  "block.echodimension.example_block": "Example Block",
+  "item.echodimension.example_item": "Example Item",
+
+  "echodimension.configuration.title": "Echo Dimension Configs",
+  "echodimension.configuration.section.echodimension.common.toml": "Echo Dimension Configs",
+  "echodimension.configuration.section.echodimension.common.toml.title": "Echo Dimension Configs",
+  "echodimension.configuration.items": "Item List",
+  "echodimension.configuration.logDirtBlock": "Log Dirt Block",
+  "echodimension.configuration.magicNumberIntroduction": "Magic Number Text",
+  "echodimension.configuration.magicNumber": "Magic Number"
 }
