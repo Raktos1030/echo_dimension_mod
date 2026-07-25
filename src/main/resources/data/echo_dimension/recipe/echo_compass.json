@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "SCS",
+    " S "
+  ],
+  "key": {
+    "S": "minecraft:echo_shard",
+    "C": "minecraft:compass"
+  },
+  "result": { "id": "echo_dimension:echo_compass", "count": 1 }
+}

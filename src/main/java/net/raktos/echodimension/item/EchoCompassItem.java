@@ -2,6 +2,7 @@ package net.raktos.echodimension.item;
 
 import java.util.Set;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -15,9 +16,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.raktos.echodimension.EchoDimension;
+import net.raktos.echodimension.block.EchoPortalShape;
+import net.raktos.echodimension.registry.ModBlocks;
+import net.minecraft.core.Direction;
 
 /**
  * Compas d'echo : clic droit pour se teleporter vers la dimension Echo,
@@ -33,31 +38,39 @@ public class EchoCompassItem extends Item {
         super(properties);
     }
 
-    @Override
+        @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-
-        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            boolean inEcho = level.dimension().equals(ECHO_LEVEL);
-            ResourceKey<Level> targetKey = inEcho ? Level.OVERWORLD : ECHO_LEVEL;
-            ServerLevel target = serverPlayer.level().getServer().getLevel(targetKey);
-
-            if (target != null) {
-                double x = serverPlayer.getX();
-                double z = serverPlayer.getZ();
-                double y = target.getHeight(Heightmap.Types.MOTION_BLOCKING, (int) x, (int) z) + 1;
-
-                serverPlayer.teleportTo(target, x, y, z, Set.of(),
-                        serverPlayer.getYRot(), serverPlayer.getXRot(), false);
-
-                target.playSound(null, serverPlayer.blockPosition(),
-                        SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.5f, 0.4f);
-
-                serverPlayer.displayClientMessage(Component.translatable(
-                        inEcho ? "message.echo_dimension.return" : "message.echo_dimension.enter"), true);
-            }
-            player.getCooldowns().addCooldown(stack, 60);
+        if (!level.isClientSide()) {
+            level.playSound(null, player.blockPosition(),
+                    SoundEvents.SCULK_SENSOR_STEP, SoundSource.PLAYERS, 1.0F, 0.6F);
+            player.displayClientMessage(
+                    Component.translatable("item.echo_dimension.echo_compass.hint"), true);
         }
         return InteractionResult.SUCCESS;
+    }
+
+        @Override
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos clicked = context.getClickedPos();
+
+        if (!level.getBlockState(clicked).is(ModBlocks.ECHO_STONE.get())) {
+            return InteractionResult.PASS;
+        }
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
+
+        // Cherche un interieur de cadre adjacent au bloc clique
+        for (Direction dir : Direction.values()) {
+            BlockPos candidate = clicked.relative(dir);
+            if (!level.getBlockState(candidate).isAir()) continue;
+            EchoPortalShape shape = EchoPortalShape.find(level, candidate);
+            if (shape != null) {
+                shape.createPortalBlocks();
+                level.playSound(null, clicked, SoundEvents.END_PORTAL_SPAWN,
+                        SoundSource.BLOCKS, 0.7F, 1.4F);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return InteractionResult.PASS;
     }
 }

@@ -3,5 +3,6 @@
     "block.echo_dimension.echo_stone": "Echo Stone",
     "item.echo_dimension.echo_compass": "Echo Compass",
     "message.echo_dimension.enter": "The world distorts... you enter the Echo.",
-    "message.echo_dimension.return": "Reality snaps back into place."
+    "message.echo_dimension.return": "Reality snaps back into place.",
+    "item.echo_dimension.echo_compass.hint": "The compass resonates... Right-click an Echo Stone frame."
 }
