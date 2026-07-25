@@ -1,0 +1,7 @@
+{
+    "itemGroup.echo_dimension": "Echo Dimension",
+    "block.echo_dimension.echo_stone": "Echo Stone",
+    "item.echo_dimension.echo_compass": "Echo Compass",
+    "message.echo_dimension.enter": "The world distorts... you enter the Echo.",
+    "message.echo_dimension.return": "Reality snaps back into place."
+}

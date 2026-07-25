@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "echo_dimension:block/echo_stone" }
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "itemGroup.echo_dimension": "Dimension Écho",
+    "block.echo_dimension.echo_stone": "Pierre d'Écho",
+    "item.echo_dimension.echo_compass": "Compas d'Écho",
+    "message.echo_dimension.enter": "Le monde se déforme... vous entrez dans l'Écho.",
+    "message.echo_dimension.return": "La réalité reprend sa place."
+}
