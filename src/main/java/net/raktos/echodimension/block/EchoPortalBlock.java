@@ -13,10 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +23,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.raktos.echodimension.item.EchoCompassItem;
-import net.raktos.echodimension.registry.ModBlocks;
 
 public class EchoPortalBlock extends Block {
 
@@ -58,41 +54,14 @@ public class EchoPortalBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
-                                     BlockPos pos, Direction direction, BlockPos neighborPos,
-                                     BlockState neighborState, RandomSource random) {
-        if (!isStillValid(level, pos, state.getValue(AXIS))) {
-            return Blocks.AIR.defaultBlockState();
-        }
-        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
-    }
-
-    private boolean isStillValid(LevelReader level, BlockPos pos, Direction.Axis axis) {
-        Direction[] toCheck = (axis == Direction.Axis.X)
-                ? new Direction[]{Direction.UP, Direction.DOWN, Direction.EAST, Direction.WEST}
-                : new Direction[]{Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH};
-
-        for (Direction dir : toCheck) {
-            BlockState neighbor = level.getBlockState(pos.relative(dir));
-            boolean ok = neighbor.is(this) || neighbor.is(ModBlocks.ECHO_STONE.get());
-            if (!ok) return false;
-        }
-        return true;
-    }
-
-    @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity,
                                 InsideBlockEffectApplier applier, boolean unused) {
         if (level.isClientSide()) return;
         if (!(entity instanceof ServerPlayer player)) return;
-        if (player.isOnPortalCooldown()) {
-            player.setPortalCooldown();
-            return;
-        }
+        if (player.isOnPortalCooldown()) return;
 
         boolean inEcho = level.dimension().equals(EchoCompassItem.ECHO_LEVEL);
-        ServerLevel target = player.level().getServer()
-                .getLevel(inEcho ? Level.OVERWORLD : EchoCompassItem.ECHO_LEVEL);
+        ServerLevel target = level.getServer().getLevel(inEcho ? Level.OVERWORLD : EchoCompassItem.ECHO_LEVEL);
         if (target == null) return;
 
         double x = player.getX();
@@ -111,12 +80,14 @@ public class EchoPortalBlock extends Block {
             level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                     SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.5F, 0.6F, false);
         }
+
         for (int i = 0; i < 2; i++) {
             double x = pos.getX() + random.nextDouble();
             double y = pos.getY() + random.nextDouble();
             double z = pos.getZ() + random.nextDouble();
             level.addParticle(ParticleTypes.REVERSE_PORTAL, x, y, z,
-                    (random.nextDouble() - 0.5) * 0.3, -random.nextDouble() * 0.2,
+                    (random.nextDouble() - 0.5) * 0.3,
+                    -random.nextDouble() * 0.2,
                     (random.nextDouble() - 0.5) * 0.3);
         }
     }

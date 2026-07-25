@@ -9,6 +9,7 @@ import net.raktos.echodimension.registry.ModItems;
 /**
  * Classe principale du mod Echo Dimension.
  * Phase 1 : bloc Echo Stone, item Echo Compass (teleporteur), dimension Echo (datapack).
+ * Phase 2 : portails lis (DataComponent), creation automatique du portail oppose.
  */
 @Mod(EchoDimension.MODID)
 public class EchoDimension {

@@ -10,13 +10,11 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.raktos.echodimension.EchoDimension;
 import net.raktos.echodimension.block.EchoPortalBlock;
-import net.minecraft.resources.Identifier;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(EchoDimension.MODID);
 
-    /** Pierre d'echo : bloc de base de la dimension. Emet une faible lueur. */
     public static final DeferredBlock<Block> ECHO_STONE = BLOCKS.registerSimpleBlock(
             "echo_stone",
             BlockBehaviour.Properties.of()
@@ -27,15 +25,15 @@ public class ModBlocks {
                     .lightLevel(state -> 3)
     );
 
-        public static final DeferredBlock<Block> ECHO_PORTAL = BLOCKS.register(
+    public static final DeferredBlock<Block> ECHO_PORTAL = BLOCKS.register(
             "echo_portal",
-            () -> new EchoPortalBlock(BlockBehaviour.Properties.of()
+            registryName -> new EchoPortalBlock(BlockBehaviour.Properties.of()
+                    .setId(ResourceKey.create(Registries.BLOCK, registryName))
                     .noCollision()
                     .noLootTable()
-                    .strength(-1.0F) // incassable a la main, comme le portail du Nether
+                    .strength(-1.0F)
                     .sound(SoundType.SCULK)
                     .lightLevel(state -> 11)
-                    .setId(ResourceKey.create(Registries.BLOCK,
-                            Identifier.fromNamespaceAndPath(EchoDimension.MODID, "echo_portal"))))
+            )
     );
 }
