@@ -3,7 +3,9 @@ package net.raktos.echodimension.item;
 import java.util.Set;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -18,15 +20,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.raktos.echodimension.EchoDimension;
 import net.raktos.echodimension.block.EchoPortalShape;
 import net.raktos.echodimension.registry.ModBlocks;
-import net.minecraft.core.Direction;
 
 /**
- * Compas d'echo : clic droit pour se teleporter vers la dimension Echo,
- * ou revenir a l'Overworld si on y est deja.
+ * Compass to bind source position and create portal frame.
+ * First right-click: stores source position/dimension in player NBT.
+ * Right-click on Echo Stone frame: creates portal.
  */
 public class EchoCompassItem extends Item {
 
@@ -34,22 +35,74 @@ public class EchoCompassItem extends Item {
             Registries.DIMENSION,
             Identifier.fromNamespaceAndPath(EchoDimension.MODID, "echo"));
 
+    public static final String TAG_ECHO_BINDING = "echo_binding";
+
     public EchoCompassItem(Properties properties) {
         super(properties);
     }
 
-        @Override
+    @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!level.isClientSide()) {
-            level.playSound(null, player.blockPosition(),
-                    SoundEvents.SCULK_SENSOR_STEP, SoundSource.PLAYERS, 1.0F, 0.6F);
-            player.displayClientMessage(
-                    Component.translatable("item.echo_dimension.echo_compass.hint"), true);
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
         }
+
+        boolean inEcho = level.dimension().equals(ECHO_LEVEL);
+        if (inEcho) {
+            // In Echo dimension: teleport back to source binding
+            CompoundTag data = player.getPersistedAccess()
+                    .getPersistentData()
+                    .getCompound(TAG_ECHO_BINDING);
+
+            if (!data.isEmpty() && data.contains("sourceDim")) {
+                ResourceKey<Level> sourceDim = ResourceKey.create(
+                        Registries.DIMENSION,
+                        Identifier.tryParse(data.getString("sourceDim")));
+                BlockPos sourcePos = new BlockPos(
+                        data.getInt("x"), data.getInt("y"), data.getInt("z"));
+
+                ServerLevel sourceLevel = level.getServer().getLevel(sourceDim);
+                if (sourceLevel != null) {
+                    ServerPlayer sp = (ServerPlayer) player;
+                    double x = sourcePos.getX() + 0.5;
+                    double z = sourcePos.getZ() + 0.5;
+                    double y = sourceLevel.getHeight(
+                            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+                            sourcePos.getX(), sourcePos.getZ()) + 1.0;
+                    sp.setPortalCooldown();
+                    sp.teleportTo(sourceLevel, x, y, z, Set.of(), sp.getYRot(), sp.getXRot(), true);
+                    sourceLevel.playSound(null, sourcePos,
+                            SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.5F, 0.7F);
+                    player.displayClientMessage(
+                            Component.translatable("item.echo_dimension.echo_compass.return"), true);
+                    return InteractionResult.SUCCESS;
+                }
+            }
+
+            player.displayClientMessage(
+                    Component.translatable("item.echo_dimension.echo_compass.no_binding"), true);
+            return InteractionResult.SUCCESS;
+        }
+
+        // In Overworld: store current position as source binding
+        CompoundTag binding = new CompoundTag();
+        binding.putString("sourceDim", level.dimension().location().toString());
+        binding.putInt("x", player.blockPosition().getX());
+        binding.putInt("y", player.blockPosition().getY());
+        binding.putInt("z", player.blockPosition().getZ());
+
+        player.getPersistedAccess()
+                .getPersistentData()
+                .put(TAG_ECHO_BINDING, binding);
+
+        level.playSound(null, player.blockPosition(),
+                SoundEvents.SCULK_SENSOR_STEP, SoundSource.PLAYERS, 1.0F, 0.6F);
+        player.displayClientMessage(
+                Component.translatable("item.echo_dimension.echo_compass.bound"), true);
         return InteractionResult.SUCCESS;
     }
 
-        @Override
+    @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         BlockPos clicked = context.getClickedPos();
@@ -59,7 +112,6 @@ public class EchoCompassItem extends Item {
         }
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
-        // Cherche un interieur de cadre adjacent au bloc clique
         for (Direction dir : Direction.values()) {
             BlockPos candidate = clicked.relative(dir);
             if (!level.getBlockState(candidate).isAir()) continue;
